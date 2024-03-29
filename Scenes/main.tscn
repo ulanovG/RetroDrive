@@ -1,0 +1,109 @@
+[gd_scene load_steps=11 format=3 uid="uid://cv73dxnry1xdn"]
+
+[ext_resource type="Shader" path="res://Scripts/Shaders/grid_ground.gdshader" id="1_6mu4f"]
+[ext_resource type="PackedScene" uid="uid://dts17qxvjdyru" path="res://Assets/Models/toyota_ae86_low_poly.glb" id="2_vl3jy"]
+[ext_resource type="PackedScene" uid="uid://ut42tgpy7gv" path="res://Scenes/Parts/main_menu.tscn" id="3_i2rsu"]
+[ext_resource type="PackedScene" uid="uid://bf4yj7hdiixfk" path="res://Scenes/Parts/pillar.tscn" id="4_aqi1s"]
+[ext_resource type="Script" path="res://Scripts/GameController.cs" id="4_llttf"]
+[ext_resource type="Script" path="res://Scripts/StateNotStarted.cs" id="5_qhv21"]
+[ext_resource type="Script" path="res://Scripts/StatePaused.cs" id="6_obwt4"]
+[ext_resource type="Script" path="res://Scripts/StatePlayingCar.cs" id="7_mxytw"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_w01e0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rm24c"]
+render_priority = 0
+shader = ExtResource("1_6mu4f")
+shader_parameter/line_color = Color(0.823529, 0, 0.784314, 1)
+shader_parameter/zoom_x = 90.0
+shader_parameter/zoom_y = 35.0
+shader_parameter/thickness_x = 0.003
+shader_parameter/thicknessCorrection_x = 2.0
+shader_parameter/powerCorrection_x = 3.0
+shader_parameter/thickness_y = 0.005
+shader_parameter/thicknessCorrection_y = 10.0
+shader_parameter/powerCorrection_y = 3.0
+shader_parameter/glow_color = Color(1, 0.486275, 0, 1)
+shader_parameter/glowSize_x = 10.0
+shader_parameter/glowPower_x = 3.0
+shader_parameter/glowSize_y = 4.0
+shader_parameter/glowPower_y = 2.0
+shader_parameter/shift_x = null
+shader_parameter/shift_y = null
+
+[node name="Node3D" type="Node3D"]
+
+[node name="main_camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.977, 120.55)
+fov = 40.0
+
+[node name="UICanvas" type="CanvasLayer" parent="."]
+
+[node name="menu" parent="UICanvas" node_paths=PackedStringArray("gameController") instance=ExtResource("3_i2rsu")]
+light_mask = 16
+visibility_layer = 16
+gameController = NodePath("../../GameController")
+metadata/_edit_use_anchors_ = true
+
+[node name="Ground" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(220, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0)
+mesh = SubResource("PlaneMesh_w01e0")
+surface_material_override/0 = SubResource("ShaderMaterial_rm24c")
+
+[node name="Car" type="Node3D" parent="."]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0.1, 87)
+
+[node name="Sketchfab_Scene" parent="Car" instance=ExtResource("2_vl3jy")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.269864, 0, 0)
+
+[node name="Sketchfab_model" parent="Car/Sketchfab_Scene" index="0"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+
+[node name="Plane_008" parent="Car/Sketchfab_Scene/Sketchfab_model/Root" index="32"]
+visible = false
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.915831, 0.401564, 0, -0.401564, 0.915831, 0, 22.4977, 109.894)
+light_energy = 0.3
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(-0.999656, -0.0261165, 0.00234555, -0.025168, 0.980745, 0.193666, -0.00735825, 0.19354, -0.981065, 0, 52.5271, -144.283)
+light_color = Color(1, 0.815686, 0, 1)
+light_energy = 6000.0
+spot_range = 262.37
+spot_angle = 15.8425
+
+[node name="Obstacles" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -95)
+
+[node name="GameController" type="Node" parent="." node_paths=PackedStringArray("initialState", "mainMenu", "car", "ground", "spawnTimer", "spawnLocation")]
+script = ExtResource("4_llttf")
+initialState = NodePath("States/NotStarted")
+mainMenu = NodePath("../UICanvas/menu")
+car = NodePath("../Car")
+ground = NodePath("../Ground/MeshInstance3D")
+targetSpeed = 70.0
+spawnTimer = NodePath("SpawnTimer")
+spawnCount = 4
+spawnLocation = NodePath("../Obstacles")
+pillar = ExtResource("4_aqi1s")
+
+[node name="States" type="Node" parent="GameController"]
+
+[node name="NotStarted" type="Node" parent="GameController/States"]
+script = ExtResource("5_qhv21")
+
+[node name="Paused" type="Node" parent="GameController/States"]
+script = ExtResource("6_obwt4")
+
+[node name="PlayingCar" type="Node" parent="GameController/States"]
+script = ExtResource("7_mxytw")
+
+[node name="SpawnTimer" type="Timer" parent="GameController"]
+
+[connection signal="timeout" from="GameController/SpawnTimer" to="GameController/States/PlayingCar" method="OnSpawnTimerTimeout"]
+
+[editable path="UICanvas/menu"]
+[editable path="Car/Sketchfab_Scene"]
