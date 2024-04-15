@@ -9,10 +9,12 @@ public partial class StatePlayingCar : State
     private double shiftX = 0;
     private double shiftY = 0;
     private Vector3 rotationVec= new Vector3(0, 0, 0);
+    private ObstacleSpawner obstacleSpawner;
 
     public override void Enter()
     {
         gameController.spawnTimer.Start();
+        obstacleSpawner = new ObstacleSpawner(gameController.spawnCount, gameController.spawnLocation, gameController.pillar);
     }
 
     public override void Update(double delta)
@@ -64,6 +66,10 @@ public partial class StatePlayingCar : State
             {
                 posX = obs.Position.X + gameController.currentSpeed * obstaclesSpeedMultX * Mathf.Sin(gameController.currentAngle) * (float)delta;
                 posZ = obs.Position.Z + gameController.currentSpeed * obstaclesSpeedMultZ * Mathf.Cos(gameController.currentAngle) * (float)delta;
+                if (posZ > 195)
+                {
+                    (obs.FindChild("AnimationPlayer") as AnimationPlayer).Play("pillar_disappear");
+                }
                 obs.Position = new Vector3(posX, 0, posZ);
             }
         }
@@ -79,15 +85,7 @@ public partial class StatePlayingCar : State
 
     public void OnSpawnTimerTimeout()
     {
-        RandomNumberGenerator rnjesus = new RandomNumberGenerator();
-
-        for (int i = 0; i < gameController.spawnCount; i++)
-        {
-            rnjesus.Randomize();
-            Node3D pillar = gameController.pillar.Instantiate<Node3D>();
-            pillar.Position = new Vector3(rnjesus.RandiRange(-215, 215), 0, 0);
-            gameController.spawnLocation.AddChild(pillar);
-        }
+        obstacleSpawner.Spawn();
     }
 
     public override void Exit()

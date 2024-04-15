@@ -76,7 +76,7 @@ spot_range = 262.37
 spot_angle = 15.8425
 
 [node name="Obstacles" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -95)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -102.568)
 
 [node name="GameController" type="Node" parent="." node_paths=PackedStringArray("initialState", "mainMenu", "car", "ground", "spawnTimer", "spawnLocation")]
 script = ExtResource("4_llttf")
@@ -86,7 +86,7 @@ car = NodePath("../Car")
 ground = NodePath("../Ground/MeshInstance3D")
 targetSpeed = 70.0
 spawnTimer = NodePath("SpawnTimer")
-spawnCount = 4
+spawnCount = 10
 spawnLocation = NodePath("../Obstacles")
 pillar = ExtResource("4_aqi1s")
 
